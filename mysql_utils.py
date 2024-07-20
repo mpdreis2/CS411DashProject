@@ -32,10 +32,30 @@ def update_interest(dbuser, dbpassword, dbport, interest):
 def getIntrestList(dbuser, dbpassword, dbport):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
-    query = "SELECT name FROM user_interests"
+    query = "SELECT name AS Interest FROM user_interests"
     interestDf = pd.read_sql(query, cxn)
     
     return interestDf
 
+def checkIfInterestExists(dbuser, dbpassword, dbport, interest):
+    cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
+    cursor = cxn.cursor()
+    query = 'SELECT name FROM user_interests WHERE name = "' + interest + '"'
+    cursor.execute(query)
+    if len(cursor.fetchall()) > 0:
+        cursor.close()
+        cxn.close()
+        return True
+    
+
+def deleteInterest(dbuser, dbpassword, dbport, interest):
+    cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
+    cursor = cxn.cursor()
+    query = 'DELETE FROM user_interests WHERE name = "' + interest + '"'
+    cursor.execute(query)
+    cxn.commit()
+    cursor.close()
+    cxn.close()
+
 if __name__ == "__main__":
-    getIntrestList("root", "root_user", "127.0.0.1")
+    deleteInterest("root", "root_user", "127.0.0.1", "treats")

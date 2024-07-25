@@ -26,11 +26,12 @@ app.layout = html.Div([
         html.Div(id="interestList")
     ]),
     
-    html.Div([
+    html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
+    value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
+    id = "faculty_by_interests_radioitems"),
 
-    ])
-    
-    
+    html.Div(id = "top_faculty_by_interest_table")
+
 ])
 @callback(
     Output("interestList", "children"),
@@ -55,23 +56,30 @@ def add_interest(new_interest, removeInterest, n_clicks, deleteClicks):
         interestDf = mysql_utils.getIntrestList(user, password, port)
         return html.Div([dash_table.DataTable(data=interestDf.to_dict('records'))])
 
+@callback(
+    Output("faculty_by_interests_radioitems", "children"),
+    Input("submitNewInterest", "n_clicks"),
+    Input("deleteInterest", "n_clicks")
+)
+def updateInterstRadioItems(n_clicks, deleteClicks):
+    changed_id = [p['prop_id'] for p in ctx.triggered][0]
+    if 'submitNewInterest' in changed_id:
+        return html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
+    value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
+    id = "faculty_by_interests_radioitems")
+    if 'deleteInterest' in changed_id:
+        return html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
+    value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
+    id = "faculty_by_interests_radioitems")
 
-# @callback(
-#     #Output("interestList", "children"),
-#     Input("removeInterest", "value"),
-#     Input("deleteInterest", "n_clicks"),
-    
-# )
-# def delete_interest(removeInterest, n_clicks):
-#     if n_clicks is None:
-#         raise PreventUpdate
 
-#     changed_id = [p['prop_id'] for p in ctx.triggered][0]
-#     if 'deleteInterest' in changed_id:
-#         if mysql_utils.checkIfInterestExists(user, password, port, removeInterest):
-#             mysql_utils.deleteInterest(user,password, port, removeInterest)
-#         return html.Div([dash_table.DataTable(data=interestDf.to_dict('records'))])
-
+@callback(
+    Output("top_faculty_by_interest_table", "children"),
+    Input("interest_radio_items", "value")
+)
+def updateFacultyByInterest(selectedValue):
+    topFacultyDf = mysql_utils.getTopFacultyByInterest(user, password, port, selectedValue)
+    return html.Div(children = [dash_table.DataTable(data = topFacultyDf.to_dict('records'))])
 
 
 

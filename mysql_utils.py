@@ -57,5 +57,19 @@ def deleteInterest(dbuser, dbpassword, dbport, interest):
     cursor.close()
     cxn.close()
 
+def getTopFacultyByInterest(dbuser, dbpassword, dbport, interest):
+    cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
+    
+    query = ''' SELECT faculty.name as Name, AVG(faculty_keyword.score) as Score, count(publication.title) as Publicaction_count
+    FROM faculty, faculty_keyword, keyword, faculty_publication, publication
+    WHERE faculty.id = faculty_keyword.faculty_id AND faculty_keyword.keyword_id = keyword.id
+    AND faculty.id = faculty_publication.faculty_id AND faculty_publication.publication_id = publication.id
+    AND keyword.name = "''' + interest + '''" GROUP BY Name ORDER BY Score DESC;
+    '''
+    facultyByInterst = pd.read_sql(query, cxn)
+    cxn.close()
+    return facultyByInterst
+
 if __name__ == "__main__":
-    deleteInterest("root", "root_user", "127.0.0.1", "treats")
+
+    print(getTopFacultyByInterest("root", "root_user", "127.0.0.1", "machine learning"))

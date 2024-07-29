@@ -72,4 +72,4 @@ def getTopFacultyByInterest(dbuser, dbpassword, dbport, interest):
 
 if __name__ == "__main__":
 
-    print(getTopFacultyByInterest("root", "root_user", "127.0.0.1", "machine learning"))
+    print(deleteInterest("root", "root_user", "127.0.0.1", "machine learning"))

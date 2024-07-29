@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import mysql
 import mysql_utils
+import time
 
 app = Dash()
 user = 'root'
@@ -15,6 +16,7 @@ app.layout = html.Div([
     
     html.Br(),
     
+    #form for adding or deleting records
     html.Div([
         html.Div(children = "Enter an interest:"),
         dcc.Input(id="new_interest", type="text", placeholder=""),
@@ -25,12 +27,18 @@ app.layout = html.Div([
         html.Br(),
         html.Div(id="interestList")
     ]),
-    
-    html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
-    value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
-    id = "faculty_by_interests_radioitems"),
 
-    html.Div(id = "top_faculty_by_interest_table")
+    #table of faculty also interested in the selected intest
+    html.Div([
+        html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
+        value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
+        id = "faculty_by_interests_radioitems"),
+
+        html.Div(id = "top_faculty_by_interest_table")
+    ])
+
+
+
 
 ])
 @callback(
@@ -42,7 +50,9 @@ app.layout = html.Div([
 )
 def add_interest(new_interest, removeInterest, n_clicks, deleteClicks):
     if n_clicks is None:
-        raise PreventUpdate
+        
+        interestDf = mysql_utils.getIntrestList(user, password, port)
+        return html.Div([dash_table.DataTable(data=interestDf.to_dict('records'))])
 
     changed_id = [p['prop_id'] for p in ctx.triggered][0]
     if 'submitNewInterest' in changed_id:
@@ -52,7 +62,8 @@ def add_interest(new_interest, removeInterest, n_clicks, deleteClicks):
         return html.Div([dash_table.DataTable(data=interestDf.to_dict('records'))])
     if 'deleteInterest' in changed_id:
         if mysql_utils.checkIfInterestExists(user, password, port, removeInterest):
-            mysql_utils.deleteInterest(user,password, port, removeInterest)
+            mysql_utils.deleteInterest(user, password, port, removeInterest)
+            print(f'{new_interest} deleted')
         interestDf = mysql_utils.getIntrestList(user, password, port)
         return html.Div([dash_table.DataTable(data=interestDf.to_dict('records'))])
 
@@ -63,6 +74,7 @@ def add_interest(new_interest, removeInterest, n_clicks, deleteClicks):
 )
 def updateInterstRadioItems(n_clicks, deleteClicks):
     changed_id = [p['prop_id'] for p in ctx.triggered][0]
+    time.sleep(1)
     if 'submitNewInterest' in changed_id:
         return html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
     value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 

@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import mysql
 import mysql_utils
+import neo4j_utils
 import time
 
 app = Dash()
@@ -28,7 +29,14 @@ app.layout = html.Div([
         html.Div(id="interestList")
     ]),
 
-    #table of faculty also interested in the selected intest
+    #graph of intresets by number of associated faculty and number of associated publications
+    html.Div([
+        html.Div(children = [dcc.RadioItems(options = ["NumberOfFaculty", "NumberOfPublications"],
+        value = "NumberOfFaculty", id = "faculty_or_pubs_items")]),
+        html.Div(id = "faculty_or_pubs_graph")
+    ]),
+
+    #table of faculty also interested in the selected intesestt
     html.Div([
         html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
         value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
@@ -94,6 +102,14 @@ def updateFacultyByInterest(selectedValue):
     return html.Div(children = [dash_table.DataTable(data = topFacultyDf.to_dict('records'))])
 
 
+@callback(
+    Output("faculty_or_pubs_graph", "children"),
+    Input("faculty_or_pubs_items", "value")
+)
+def updateFacultyOfPubGraph(selection):
+    df = neo4j_utils.getFacAndPubCountsByInterest()
+
+    return html.Div([dcc.Graph(figure=px.histogram(df, x="Interest", y=selection))])
 
 if __name__ == '__main__':
     mysql_utils.initialize_database(user, password, port)

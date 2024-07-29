@@ -90,6 +90,10 @@ def add_interest(new_interest, removeInterest, n_clicks, deleteClicks):
 def updateInterstRadioItems(n_clicks, deleteClicks):
     changed_id = [p['prop_id'] for p in ctx.triggered][0]
     time.sleep(1)
+    if n_clicks is None:
+        return html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
+    value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
+    id = "faculty_by_interests_radioitems")
     if 'submitNewInterest' in changed_id:
         return html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
     value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 

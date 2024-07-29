@@ -5,6 +5,7 @@ import plotly.express as px
 import mysql
 import mysql_utils
 import neo4j_utils
+import mongo_utils
 import time
 
 app = Dash()
@@ -43,8 +44,14 @@ app.layout = html.Div([
         id = "faculty_by_interests_radioitems"),
 
         html.Div(id = "top_faculty_by_interest_table")
-    ])
+    ]),
 
+    #publication list with radio items to select most recent or most relevant
+    html.Div([
+        html.Div(children = [dcc.RadioItems(options = ["Most Recent", "Most Relevant"],
+        value = "Most Recent", id = "pubs_by_year_or_score")]),
+        html.Div(id = "pubs_by_year_or_score_table")
+    ]),
 
 
 
@@ -110,6 +117,20 @@ def updateFacultyOfPubGraph(selection):
     df = neo4j_utils.getFacAndPubCountsByInterest()
 
     return html.Div([dcc.Graph(figure=px.histogram(df, x="Interest", y=selection))])
+
+@callback(
+    Output("pubs_by_year_or_score_table", "children"),
+    Input("pubs_by_year_or_score", "value")
+)
+def getTableOfPubsByYearOrScore(selection):
+    interestList = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()
+    if selection == "Most Recent":
+        df = mongo_utils.getPubsByYear(interestList)
+        return html.Div(children = [dash_table.DataTable(data = df.to_dict('records'))])
+    elif selection == "Most Relevant":
+        df = mongo_utils.getPubsByScore(interestList)
+        return html.Div(children = [dash_table.DataTable(data = df.to_dict('records'))])
+
 
 if __name__ == '__main__':
     mysql_utils.initialize_database(user, password, port)

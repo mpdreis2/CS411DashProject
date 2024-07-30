@@ -6,20 +6,21 @@ def print_data():
     cnx = mysql.connector.connect(user='root', password='root_user', host = "127.0.0.1", database = 'academicworld')
     cursor = cnx.cursor()
 
-    query = "SHOW TABLES"
+    query = "SHOW INDEX FROM keyword"
+
 
     cursor.execute(query)
-
-    for (name) in cursor:
-        print('{}'.format(name))
-
-    if 'faculty' in cursor:
+    data =cursor.fetchall()
+    print(data[1])
+    if "keyword_index" in data[1]:
         print('got it')
+    
+
     
     
     cursor.close()
-    df = pd.read_sql("SELECT * FROM user_interests LIMIT 10", cnx)
-    print(df.head())
+   # df = pd.read_sql("SELECT * FROM user_interests LIMIT 10", cnx)
+    #print(df.head())
 
     cnx.close()
 

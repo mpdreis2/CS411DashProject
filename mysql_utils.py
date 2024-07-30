@@ -16,6 +16,24 @@ def initialize_database(dbuser, dbpassword, dbport):
         PRIMARY KEY (id));
         """
         cursor.execute(createTableQuery)
+    
+        query = "CREATE INDEX keyword_index on keyword(name);"
+        cursor.execute(query)
+        
+    
+    # query = "SHOW INDEX FROM user_interests"
+    # cursor.execute(query)
+    # data = cursor.fetchall()
+    # indexExists = False
+    # for row in data:
+    #     if "keyword_index" in row:
+    #         indexExists = True
+    # if indexExists == False:
+    #     query = "CREATE INDEX keyword_index on keyword(name);"
+    #     cursor.execute(query)
+
+    
+    
 
     cursor.close()
     cxn.close()

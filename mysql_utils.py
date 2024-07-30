@@ -16,8 +16,23 @@ def initialize_database(dbuser, dbpassword, dbport):
         PRIMARY KEY (id));
         """
         cursor.execute(createTableQuery)
+
+        createTableQuery = """CREATE TABLE favorite_faculty (
+            id INT NOT NULL,
+            faculty_id int NOT NULL,
+            PRIMARY KEY (ID),
+            FOREIGN KEY (faculty_id) REFERENCES faculty(id));"""
+        
+        cursor.execute(createTableQuery)
     
         query = "CREATE INDEX keyword_index on keyword(name);"
+        cursor.execute(query)
+
+        query = """CREATE VIEW faculty_info AS
+        SELECT faculty.name as Name, faculty.position as Position, faculty.email as Email, university.name as Intstitution, faculty.photo_url as facultyPhoto, university.photo_url as universityPhoto
+        FROM faculty, university
+        WHERE faculty.university_id = university.id;"""
+
         cursor.execute(query)
         
     
@@ -88,6 +103,34 @@ def getTopFacultyByInterest(dbuser, dbpassword, dbport, interest):
     cxn.close()
     return facultyByInterst
 
+def addFavoriteFaculty(dbuser, dbpassword, dbport, facultyName):
+    cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
+    cursor = cxn.cursor()
+    query = 'SELECT id from faculty WHERE name = "' + facultyName + '";'
+    cursor.execute(query)
+    newfacultyID = cursor.fetchall()[0][0]
+    query = 'SELECT MAX(id) FROM favorite_faculty'
+    cursor.execute(query)
+    nextID = cursor.fetchall()[0][0]
+    if nextID == None:
+        nextID = 0
+    else:
+        nextID += 1
+    query = "INSERT INTO favorite_faculty VALUES (%s, %s)"
+    cursor.execute(query, (nextID, newfacultyID))
+
+    cxn.commit()
+    cursor.close()
+    cxn.close()
+
+def getFavoriteFacultyDf(dbuser, dbpassword, dbport):
+    cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
+    cursor = cxn.cursor()
+    query = "SELECT * FROM faculty_info WHERE faculty_info.id IN (SELECT id from favorite_faculty)"
+    df = pd.read_sql(query, cxn)
+    print(df.head())
+
+
 if __name__ == "__main__":
 
-    print(deleteInterest("root", "root_user", "127.0.0.1", "machine learning"))
+    getFavoriteFacultyDf("root", "root_user", "127.0.0.1")

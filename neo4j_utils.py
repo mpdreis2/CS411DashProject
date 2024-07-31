@@ -18,4 +18,4 @@ def getFacAndPubCountsByInterest():
     return df
 
 if __name__ == "__main__":
-    print(getFacAndPubCountsByInterest(driver).head())
+    print(getFacAndPubCountsByInterest().head())

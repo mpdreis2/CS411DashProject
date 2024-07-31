@@ -132,7 +132,17 @@ def getFavoriteFacultyDf(dbuser, dbpassword, dbport):
     
     return df
 
+def getUniversityDf(dbuser, dbpassword, dbport):
+    cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
+    cursor = cxn.cursor()
+    query = """SELECT university.name AS University, COUNT(DISTINCT faculty.name) FacultyNumber
+    FROM faculty, university, keyword, faculty_keyword
+    WHERE faculty.id = faculty_keyword.faculty_id AND faculty.university_id = university.id
+    AND faculty_keyword.keyword_id = keyword.id AND keyword.name IN (SELECT name FROM user_interests)
+    GROUP BY University
+    ORDER BY FacultyNumber DESC LIMIT 10;"""
+    df = pd.read_sql(query, cxn)
+    return df
 
 if __name__ == "__main__":
-
-    getFavoriteFacultyDf("root", "root_user", "127.0.0.1")
+    print(getUniversityDf("root", "root_user", "127.0.0.1").head())

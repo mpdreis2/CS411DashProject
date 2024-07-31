@@ -30,59 +30,77 @@ app.layout = html.Div([
     
     html.Br(),
     
+    
     #Widget 1: Form for adding or deleting intrests, which displays the current interests in a table
-    html.Div(className = 'widget_2_component', children = [
-        html.Div(children = [
+    html.Div(className = "widget", children = [
+        html.Div(className = 'widget_2_component', children = [
+            html.Div(children = [
 
-        html.Div(children = "Enter an interest:"),
-        dcc.Input(id="new_interest", type="text", placeholder=""),
-        html.Button("Submit", id="submitNewInterest"),
-        html.Div(children = "Remove an interest:"),
-        dcc.Input(id="removeInterest", type="text", placeholder=""),
-        html.Button("Delete", id="deleteInterest"),
+            html.Div(children = "Enter an interest:"),
+            dcc.Input(id="new_interest", type="text", placeholder=""),
+            html.Button("Submit", id="submitNewInterest"),
+            html.Div(children = "Remove an interest:"),
+            dcc.Input(id="removeInterest", type="text", placeholder=""),
+            html.Button("Delete", id="deleteInterest"),
 
+            ]),
+
+            html.Div(id="interestList"),
         ]),
-
-        html.Div(id="interestList"),
     ]),
 
     #Widget 2: Graph of intresets and number of associated faculty and number of associated publications
-    html.Div(className = 'widget_2_component', children = [
-        html.Div(children = [dcc.RadioItems(options = ["NumberOfFaculty", "NumberOfPublications"],
-        value = "NumberOfFaculty", id = "faculty_or_pubs_items")]),
-        html.Div(id = "faculty_or_pubs_graph")
+    html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_2_component', children = [
+            html.Div(children = [dcc.RadioItems(options = ["NumberOfFaculty", "NumberOfPublications"],
+            value = "NumberOfFaculty", id = "faculty_or_pubs_items")]),
+            html.Div(id = "faculty_or_pubs_graph")
+        ]),
     ]),
 
     #Widget 3: Table of faculty also interested in the selected intesest
-    html.Div(className = 'widget_2_component', children = [
-        html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
-        value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
-        id = "faculty_by_interests_radioitems"),
+    html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_2_component', children = [
+            html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
+            value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
+            id = "faculty_by_interests_radioitems"),
 
-        html.Div(id = "top_faculty_by_interest_table")
-    ]),
-
-    #Widget 4: publication list with radio items to select most recent or most relevant
-    html.Div(className = 'widget_2_component', children = [
-        html.Div(children = [dcc.RadioItems(options = ["Most Recent", "Most Relevant"],
-        value = "Most Recent", id = "pubs_by_year_or_score")]),
-        html.Div(id = "pubs_by_year_or_score_table")
-    ]),
-
-    #Widget 5: Tracks favorite faculty and their contact info
-    html.Div(className = 'widget_2_component', children = [
-        html.Div([
-        html.Div(children = "Favorite Faculty"),
-        html.Div(children = "Add favorite faculty by name:"),
-        dcc.Input(id="new_faculty", type="text", placeholder=""),
-        html.Button("Submit", id="submitNewFaculty"),
-        html.Div(children = "Remove faculty:"),
-        dcc.Input(id="removeFaculty", type="text", placeholder=""),
-        html.Button("Delete", id="deleteFaculty"),
-        html.Br(),
+            html.Div(id = "top_faculty_by_interest_table")
         ]),
-        html.Div(getFavoriteFacutlyDivList(user, password, port), id = "list_of_favorite_faculty"),
-    ])
+    ]),
+
+    #Widget 4: Tracks favorite faculty and their contact info
+    html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_2_component', children = [
+            html.Div([
+            html.Div(children = "Favorite Faculty"),
+            html.Div(children = "Add favorite faculty by name:"),
+            dcc.Input(id="new_faculty", type="text", placeholder=""),
+            html.Button("Submit", id="submitNewFaculty"),
+            html.Div(children = "Remove faculty:"),
+            dcc.Input(id="removeFaculty", type="text", placeholder=""),
+            html.Button("Delete", id="deleteFaculty"),
+            html.Br(),
+            ]),
+            html.Div(getFavoriteFacutlyDivList(user, password, port), id = "list_of_favorite_faculty"),
+        ]),
+    ]),
+
+    #Widget 5: publication list with radio items to select most recent or most relevant
+    html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_2_component', children = [
+            html.Div(children = [dcc.RadioItems(options = ["Most Recent", "Most Relevant"],
+            value = "Most Recent", id = "pubs_by_year_or_score")]),
+            html.Div(id = "pubs_by_year_or_score_table")
+        ]),
+    ]),
+
+    #Widget 6: graph of universities with most faculty sharing user interests
+    html.Div(className = 'widget', children = [
+        html.Div(id = "graph_of_universities", children = [dcc.Graph(figure=px.histogram(mysql_utils.getUniversityDf(user, password, port), x="University", y="FacultyNumber" ))]),
+    ]),
+
+    
 
 
 
@@ -193,9 +211,23 @@ def add_interest(new_faculty, removeFaculty, n_clicks, deleteClicks):
         #need code to remove a favorite facutlty
         return getFavoriteFacutlyDivList(user, password, port)
 
+@callback(
+    Output("graph_of_universities", "children"),
+    Input("submitNewInterest", "n_clicks"),
+    Input("deleteInterest", "n_clicks")
+)
+def getUniversityGraph(n_clicks, deleteClicks):
 
-
-
+    if n_clicks is None and deleteClicks is None:
+        df = mysql_utils.getUniversityDf(user, password, port)
+        return html.Div(id = "graph_of_universities", children = [dcc.Graph(figure=px.histogram(df, x="University", y="FacultyNumber"))])
+    changed_id = [p['prop_id'] for p in ctx.triggered][0]
+    if 'submitNewInterest' in changed_id:
+        df = mysql_utils.getUniversityDf(user, password, port)
+        return html.Div(id = "graph_of_universities", children = [dcc.Graph(figure=px.histogram(df, x="University", y="FacultyNumber"))])
+    if 'deleteInterest' in changed_id:
+        df = mysql_utils.getUniversityDf(user, password, port)
+        return html.Div(id = "graph_of_universities", children = [dcc.Graph(figure=px.histogram(df, x="University", y="FacultyNumber"))])
 
 if __name__ == '__main__':
     mysql_utils.initialize_database(user, password, port)

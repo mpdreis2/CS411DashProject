@@ -1,8 +1,11 @@
+.widget {
+    background-color: azure;
+    border: 5px solid black;
+}
+
 .widget_2_component {
     display: grid;
     grid: auto / 200px auto;
-    background-color: azure;
-    border: 5px solid black;
     padding: 10px;
     margin: 10px;
 }

@@ -17,7 +17,12 @@ def getFavoriteFacutlyDivList(dbuser, dbpassword, port):
     df = mysql_utils.getFavoriteFacultyDf(dbuser, dbpassword, port)
     divList = []
     for i in df.index:
-        divList.append(html.Div(children = [html.Img(className = 'row_image', src = df["facultyPhoto"][i]), df["Name"][i], df["Email"][i], html.Img(className = 'row_image', src = df["universityPhoto"][i]) ]))
+        divList.append(html.Div(className = "row_item", children = [
+            html.Div(className = "column_item", children=[html.Img(className = 'row_image', src = df["facultyPhoto"][i])]),
+            html.Div(className = "column_item", children = [df["Name"][i]]),
+            html.Div(className = "column_item", children = [df["Email"][i]]),
+            html.Div(className = "column_item", children = [html.Img(className = 'row_image', src = df["universityPhoto"][i])]),
+            ]))
     return divList
 
 app.layout = html.Div([
@@ -161,10 +166,10 @@ def getTableOfPubsByYearOrScore(selection):
     interestList = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()
     if selection == "Most Recent":
         df = mongo_utils.getPubsByYear(interestList)
-        return html.Div(children = [dash_table.DataTable(data = df.to_dict('records'))])
+        return html.Div(children = [dash_table.DataTable(data = df.to_dict('records'), style_cell={"text_align":"left", "whiteSpace":"normal"})])
     elif selection == "Most Relevant":
         df = mongo_utils.getPubsByScore(interestList)
-        return html.Div(children = [dash_table.DataTable(data = df.to_dict('records'))])
+        return html.Div(children = [dash_table.DataTable(data = df.to_dict('records'), style_cell={"text_align":"left", "whiteSpace":"normal"})])
 
 #Callback for widget 5 to add or remove faculty
 @callback(

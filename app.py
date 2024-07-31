@@ -13,6 +13,13 @@ user = 'root'
 password = 'root_user'
 port = '127.0.0.1'
 
+def getFavoriteFacutlyDivList(dbuser, dbpassword, port):
+    df = mysql_utils.getFavoriteFacultyDf(dbuser, dbpassword, port)
+    divList = []
+    for i in df.index:
+        divList.append(html.Div([html.Img(src = df["facultyPhoto"][i]), df["Name"][i], df["Email"][i], html.Img(src = df["universityPhoto"][i]) ]))
+    return divList
+
 app.layout = html.Div([
     html.Div(children = 'Title'),
     
@@ -53,9 +60,24 @@ app.layout = html.Div([
         html.Div(id = "pubs_by_year_or_score_table")
     ]),
 
+    html.Div([
+        html.Div(children = "Favorite Faculty"),
+        html.Div([
+        html.Div(children = "Add favorite faculty by name:"),
+        dcc.Input(id="new_faculty", type="text", placeholder=""),
+        html.Button("Submit", id="submitNewFaculty"),
+        html.Div(children = "Remove faculty:"),
+        dcc.Input(id="removeFaculty", type="text", placeholder=""),
+        html.Button("Delete", id="deleteFaculty"),
+        html.Br(),
+        ]),
+        html.Div(getFavoriteFacutlyDivList(user, password, port), id = "list_of_favorite_faculty"),
+    ])
+
 
 
 ])
+
 @callback(
     Output("interestList", "children"),
     Input("new_interest", "value"),
@@ -136,6 +158,32 @@ def getTableOfPubsByYearOrScore(selection):
         return html.Div(children = [dash_table.DataTable(data = df.to_dict('records'))])
 
 
+@callback(
+    Output("list_of_favorite_faculty", "children"),
+    Input("new_faculty", "value"),
+    Input("removeFaculty", "value"),
+    Input("submitNewFaculty", "n_clicks"),
+    Input("deleteFaculty", "n_clicks")
+)
+def add_interest(new_faculty, removeFaculty, n_clicks, deleteClicks):
+    if n_clicks is None:
+        
+        return getFavoriteFacutlyDivList(user, password, port)
+        
+
+    changed_id = [p['prop_id'] for p in ctx.triggered][0]
+    if 'submitNewFaculty' in changed_id:
+        mysql_utils.addFavoriteFaculty(user, password, port, new_faculty)
+        return getFavoriteFacutlyDivList(user, password, port)
+    if 'deleteFaculty' in changed_id:
+        #need code to remove a favorite facutlty
+        return getFavoriteFacutlyDivList(user, password, port)
+
+
+
+
+
 if __name__ == '__main__':
     mysql_utils.initialize_database(user, password, port)
     app.run(debug=True)
+    

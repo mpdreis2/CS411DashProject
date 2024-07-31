@@ -106,9 +106,10 @@ def getTopFacultyByInterest(dbuser, dbpassword, dbport, interest):
 def addFavoriteFaculty(dbuser, dbpassword, dbport, facultyName):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
-    query = 'SELECT id from faculty WHERE name = "' + facultyName + '";'
+    query = 'SELECT id FROM faculty WHERE name = "' + facultyName + '";'
     cursor.execute(query)
     newfacultyID = cursor.fetchall()[0][0]
+    print(newfacultyID)
     query = 'SELECT MAX(id) FROM favorite_faculty'
     cursor.execute(query)
     nextID = cursor.fetchall()[0][0]
@@ -126,9 +127,10 @@ def addFavoriteFaculty(dbuser, dbpassword, dbport, facultyName):
 def getFavoriteFacultyDf(dbuser, dbpassword, dbport):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
-    query = "SELECT * FROM faculty_info WHERE faculty_info.id IN (SELECT id from favorite_faculty)"
+    query = "SELECT * FROM faculty_info WHERE faculty_info.id IN (SELECT faculty_id from favorite_faculty)"
     df = pd.read_sql(query, cxn)
-    print(df.head())
+    
+    return df
 
 
 if __name__ == "__main__":

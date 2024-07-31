@@ -33,6 +33,7 @@ app.layout = html.Div([
     
     #Widget 1: Form for adding or deleting intrests, which displays the current interests in a table
     html.Div(className = "widget", children = [
+        html.Div(className = 'widget_header', children = [html.H1("Interest List"), html.P("Enter and remove interests here. These interests will be used to help make connections in the academic world.")]),
         html.Div(className = 'widget_2_component', children = [
             html.Div(children = [
 
@@ -51,6 +52,7 @@ app.layout = html.Div([
 
     #Widget 2: Graph of intresets and number of associated faculty and number of associated publications
     html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
         html.Div(className = 'widget_2_component', children = [
             html.Div(children = [dcc.RadioItems(options = ["NumberOfFaculty", "NumberOfPublications"],
             value = "NumberOfFaculty", id = "faculty_or_pubs_items")]),
@@ -60,6 +62,7 @@ app.layout = html.Div([
 
     #Widget 3: Table of faculty also interested in the selected intesest
     html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
         html.Div(className = 'widget_2_component', children = [
             html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
             value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
@@ -71,6 +74,7 @@ app.layout = html.Div([
 
     #Widget 4: Tracks favorite faculty and their contact info
     html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
         html.Div(className = 'widget_2_component', children = [
             html.Div([
             html.Div(children = "Favorite Faculty"),
@@ -88,6 +92,7 @@ app.layout = html.Div([
 
     #Widget 5: publication list with radio items to select most recent or most relevant
     html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
         html.Div(className = 'widget_2_component', children = [
             html.Div(children = [dcc.RadioItems(options = ["Most Recent", "Most Relevant"],
             value = "Most Recent", id = "pubs_by_year_or_score")]),
@@ -97,6 +102,7 @@ app.layout = html.Div([
 
     #Widget 6: graph of universities with most faculty sharing user interests
     html.Div(className = 'widget', children = [
+        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
         html.Div(id = "graph_of_universities", children = [dcc.Graph(figure=px.histogram(mysql_utils.getUniversityDf(user, password, port), x="University", y="FacultyNumber" ))]),
     ]),
 

@@ -92,7 +92,7 @@ def deleteInterest(dbuser, dbpassword, dbport, interest):
 def getTopFacultyByInterest(dbuser, dbpassword, dbport, interest):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     
-    query = ''' SELECT faculty.name as Name, AVG(faculty_keyword.score) as Score, count(publication.title) as Publicaction_count
+    query = ''' SELECT faculty.name as Name, AVG(faculty_keyword.score) as Score, count(publication.title) as Publication_count
     FROM faculty, faculty_keyword, keyword, faculty_publication, publication
     WHERE faculty.id = faculty_keyword.faculty_id AND faculty_keyword.keyword_id = keyword.id
     AND faculty.id = faculty_publication.faculty_id AND faculty_publication.publication_id = publication.id
@@ -141,7 +141,26 @@ def getUniversityDf(dbuser, dbpassword, dbport):
     GROUP BY University
     ORDER BY FacultyNumber DESC LIMIT 10;"""
     df = pd.read_sql(query, cxn)
+    cursor.close()
+    cxn.close()
     return df
 
+def removeFavoriteFacaulty(dbuser, dbpassword, dbport, facultyToDelete):
+    cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
+    cursor = cxn.cursor()
+
+    query = "SELECT faculty.id FROM faculty WHERE faculty.name = %s"
+
+    cursor.execute(query, (facultyToDelete,))
+    facultyId = cursor.fetchall()[0][0]
+    
+    query = ("DELETE FROM favorite_faculty WHERE faculty_id = %s")
+    cursor.execute(query, (facultyId,))
+    cxn.commit()
+    cursor.close()
+    cxn.close()
+
+
 if __name__ == "__main__":
-    initialize_database("root", "root_user", "127.0.0.1")
+
+    removeFavoriteFacaulty("root", "root_user", "127.0.0.1", 'Thomas R. Ioerger')

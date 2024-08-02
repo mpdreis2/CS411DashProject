@@ -16,6 +16,12 @@ INITIALIZED = False
 def getFavoriteFacutlyDivList(dbuser, dbpassword, port):
     df = mysql_utils.getFavoriteFacultyDf(dbuser, dbpassword, port)
     divList = []
+    divList.append(html.Div(className = "row_item", children = [
+            html.Div(className = "column_item", children = html.H2("Photo")),
+            html.Div(className = "column_item", children = html.H2("Name")),
+            html.Div(className = "column_item", children = html.H2("Email")),
+            html.Div(className = "column_item", children = html.H2("Univeristy")),
+    ]))
     for i in df.index:
         divList.append(html.Div(className = "row_item", children = [
             html.Div(className = "column_item", children=[html.Img(className = 'row_image', src = df["facultyPhoto"][i])]),
@@ -169,7 +175,7 @@ def updateInterstRadioItems(n_clicks, deleteClicks):
 )
 def updateFacultyByInterest(selectedValue):
     topFacultyDf = mysql_utils.getTopFacultyByInterest(user, password, port, selectedValue)
-    return html.Div(children = [dash_table.DataTable(data = topFacultyDf.to_dict('records'))])
+    return html.Div(children = [dash_table.DataTable(data = topFacultyDf.to_dict('records'), page_size=10)])
 
 #callback to update widget 2 when a radio item is changed
 @callback(
@@ -214,7 +220,7 @@ def add_interest(new_faculty, removeFaculty, n_clicks, deleteClicks):
         mysql_utils.addFavoriteFaculty(user, password, port, new_faculty)
         return getFavoriteFacutlyDivList(user, password, port)
     if 'deleteFaculty' in changed_id:
-        #need code to remove a favorite facutlty
+        mysql_utils.removeFavoriteFacaulty(user, password, port, removeFaculty)
         return getFavoriteFacutlyDivList(user, password, port)
 
 @callback(
@@ -236,5 +242,5 @@ def getUniversityGraph(n_clicks, deleteClicks):
         return html.Div(id = "graph_of_universities", children = [dcc.Graph(figure=px.histogram(df, x="University", y="FacultyNumber"))])
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug = True)
     

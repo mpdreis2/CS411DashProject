@@ -1,6 +1,7 @@
 .widget {
     background-color: azure;
     border: 5px solid black;
+    margin: 10px;
 }
 
 .widget_2_component {

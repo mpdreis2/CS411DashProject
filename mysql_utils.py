@@ -9,55 +9,54 @@ def initialize_database(dbuser, dbpassword, dbport):
     cursor.execute("SHOW TABLES")
     result = cursor.fetchall()
     
-    if "user_interests" not in [table[0] for table in result]:
-        createTableQuery = """ CREATE TABLE user_interests (
+    # if "user_interests" not in [table[0] for table in result]:
+    createTableQuery = """ CREATE TABLE user_interests (
+    id INT NOT NULL,
+    name VARCHAR(256) NOT NULL,
+    PRIMARY KEY (id));
+    """
+    cursor.execute(createTableQuery)
+
+    query = "INSERT INTO user_interests VALUES (%s, %s)"
+    cursor.execute(query, (0, "databases"))
+
+    createTableQuery = """CREATE TABLE favorite_faculty (
         id INT NOT NULL,
-        name VARCHAR(256) NOT NULL,
-        PRIMARY KEY (id));
-        """
-        cursor.execute(createTableQuery)
-
-        createTableQuery = """CREATE TABLE favorite_faculty (
-            id INT NOT NULL,
-            faculty_id int NOT NULL,
-            PRIMARY KEY (ID),
-            FOREIGN KEY (faculty_id) REFERENCES faculty(id));"""
-        
-        cursor.execute(createTableQuery)
+        faculty_id int NOT NULL,
+        PRIMARY KEY (ID),
+        FOREIGN KEY (faculty_id) REFERENCES faculty(id));"""
     
-        query = "CREATE INDEX keyword_index on keyword(name);"
-        cursor.execute(query)
+    cursor.execute(createTableQuery)
 
-        query = """CREATE VIEW faculty_info AS
-        SELECT faculty.name as Name, faculty.position as Position, faculty.email as Email, university.name as Intstitution, faculty.photo_url as facultyPhoto, university.photo_url as universityPhoto
-        FROM faculty, university
-        WHERE faculty.university_id = university.id;"""
+    query = "CREATE INDEX keyword_index on keyword(name);"
+    cursor.execute(query)
 
-        cursor.execute(query)
-        
+    query = """CREATE VIEW faculty_info AS
+    SELECT faculty.id, faculty.name as Name, faculty.position as Position, faculty.email as Email, university.name as Intstitution, faculty.photo_url as facultyPhoto, university.photo_url as universityPhoto
+    FROM faculty, university
+    WHERE faculty.university_id = university.id;"""
+
+    cursor.execute(query)
     
-    # query = "SHOW INDEX FROM user_interests"
-    # cursor.execute(query)
-    # data = cursor.fetchall()
-    # indexExists = False
-    # for row in data:
-    #     if "keyword_index" in row:
-    #         indexExists = True
-    # if indexExists == False:
-    #     query = "CREATE INDEX keyword_index on keyword(name);"
-    #     cursor.execute(query)
-
-    
-    
-
+    cxn.commit()
     cursor.close()
     cxn.close()
+
+    return True
 
 def update_interest(dbuser, dbpassword, dbport, interest):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
-    query = 'INSERT INTO user_interests (id, name) VALUES ((SELECT max(id) + 1 FROM user_interests as i), "' + interest + '")'
+    query = "SELECT max(id) FROM user_interests"
     cursor.execute(query)
+    nextID = cursor.fetchall()[0][0]
+    if nextID == None:
+        nextID = 0
+    else:
+        nextID += 1
+    
+    query = 'INSERT INTO user_interests (id, name) VALUES (%s, %s)'
+    cursor.execute(query, (nextID, interest))
     cxn.commit()
     cursor.close()
     cxn.close()
@@ -84,8 +83,8 @@ def checkIfInterestExists(dbuser, dbpassword, dbport, interest):
 def deleteInterest(dbuser, dbpassword, dbport, interest):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
-    query = 'DELETE FROM user_interests WHERE name = "' + interest + '"'
-    cursor.execute(query)
+    query = 'DELETE FROM user_interests WHERE name = %s'
+    cursor.execute(query, (interest,))
     cxn.commit()
     cursor.close()
     cxn.close()
@@ -145,4 +144,4 @@ def getUniversityDf(dbuser, dbpassword, dbport):
     return df
 
 if __name__ == "__main__":
-    print(getUniversityDf("root", "root_user", "127.0.0.1").head())
+    initialize_database("root", "root_user", "127.0.0.1")

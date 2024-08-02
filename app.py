@@ -2,7 +2,6 @@ from dash import Dash, html, dash_table, dcc, callback, Output, Input, ctx, dash
 from dash.exceptions import PreventUpdate
 import pandas as pd
 import plotly.express as px
-import mysql
 import mysql_utils
 import neo4j_utils
 import mongo_utils
@@ -12,6 +11,7 @@ app = Dash(__name__)
 user = 'root'
 password = 'root_user'
 port = '127.0.0.1'
+INITIALIZED = False
 
 def getFavoriteFacutlyDivList(dbuser, dbpassword, port):
     df = mysql_utils.getFavoriteFacultyDf(dbuser, dbpassword, port)
@@ -52,7 +52,7 @@ app.layout = html.Div([
 
     #Widget 2: Graph of intresets and number of associated faculty and number of associated publications
     html.Div(className = 'widget', children = [
-        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
+        html.Div(className = 'widget_header', children = [html.H1("Most Popular Interests"), html.P("Choose to see a graph of number of faculty who share an intrest or publications about an interest")]),
         html.Div(className = 'widget_2_component', children = [
             html.Div(children = [dcc.RadioItems(options = ["NumberOfFaculty", "NumberOfPublications"],
             value = "NumberOfFaculty", id = "faculty_or_pubs_items")]),
@@ -62,7 +62,7 @@ app.layout = html.Div([
 
     #Widget 3: Table of faculty also interested in the selected intesest
     html.Div(className = 'widget', children = [
-        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
+        html.Div(className = 'widget_header', children = [html.H1("Top Faculty"), html.P("Choose an intersest to see top rated faculty in that field.")]),
         html.Div(className = 'widget_2_component', children = [
             html.Div(children = [dcc.RadioItems(options = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list(),
             value = mysql_utils.getIntrestList(user, password, port)["Interest"].to_list()[0], id = "interest_radio_items")], 
@@ -74,7 +74,7 @@ app.layout = html.Div([
 
     #Widget 4: Tracks favorite faculty and their contact info
     html.Div(className = 'widget', children = [
-        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
+        html.Div(className = 'widget_header', children = [html.H1("Faculty Tracker"), html.P('Enter a faculty name to save there info.')]),
         html.Div(className = 'widget_2_component', children = [
             html.Div([
             html.Div(children = "Favorite Faculty"),
@@ -92,7 +92,7 @@ app.layout = html.Div([
 
     #Widget 5: publication list with radio items to select most recent or most relevant
     html.Div(className = 'widget', children = [
-        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
+        html.Div(className = 'widget_header', children = [html.H1("Top Publications"), html.P("See most recent or most relevant publications related to your interests.")]),
         html.Div(className = 'widget_2_component', children = [
             html.Div(children = [dcc.RadioItems(options = ["Most Recent", "Most Relevant"],
             value = "Most Recent", id = "pubs_by_year_or_score")]),
@@ -102,7 +102,7 @@ app.layout = html.Div([
 
     #Widget 6: graph of universities with most faculty sharing user interests
     html.Div(className = 'widget', children = [
-        html.Div(className = 'widget_header', children = [html.H1(), html.P()]),
+        html.Div(className = 'widget_header', children = [html.H1("Top Universities"), html.P("See which universities have the most faculty that share at least one of your interests.")]),
         html.Div(id = "graph_of_universities", children = [dcc.Graph(figure=px.histogram(mysql_utils.getUniversityDf(user, password, port), x="University", y="FacultyNumber" ))]),
     ]),
 
@@ -236,6 +236,5 @@ def getUniversityGraph(n_clicks, deleteClicks):
         return html.Div(id = "graph_of_universities", children = [dcc.Graph(figure=px.histogram(df, x="University", y="FacultyNumber"))])
 
 if __name__ == '__main__':
-    mysql_utils.initialize_database(user, password, port)
     app.run(debug=True)
     

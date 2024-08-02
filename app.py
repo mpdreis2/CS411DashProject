@@ -1,5 +1,4 @@
 from dash import Dash, html, dash_table, dcc, callback, Output, Input, ctx, dash_table
-from dash.exceptions import PreventUpdate
 import pandas as pd
 import plotly.express as px
 import mysql_utils
@@ -11,7 +10,7 @@ app = Dash(__name__)
 user = 'root'
 password = 'root_user'
 port = '127.0.0.1'
-INITIALIZED = False
+
 
 def getFavoriteFacutlyDivList(dbuser, dbpassword, port):
     df = mysql_utils.getFavoriteFacultyDf(dbuser, dbpassword, port)

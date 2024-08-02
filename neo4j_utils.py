@@ -2,7 +2,7 @@ from neo4j import GraphDatabase, Result
 import pandas as pd
 import mysql_utils
 
-
+#neo4j query to get count of faculty and publication sharing a user interest:
 def getFacAndPubCountsByInterest():
     address="neo4j://localhost:7687"
     auth=('neo4j', "ilovecs411")
@@ -16,6 +16,3 @@ def getFacAndPubCountsByInterest():
     df = driver.execute_query(query, interestList = interestList, database_ = "academicworld", 
     result_transformer_=Result.to_df)
     return df
-
-if __name__ == "__main__":
-    print(getFacAndPubCountsByInterest().head())

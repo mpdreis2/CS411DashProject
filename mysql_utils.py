@@ -44,6 +44,7 @@ def initialize_database(dbuser, dbpassword, dbport):
 
     return True
 
+#fxn to add an interst to the user_interest table:
 def update_interest(dbuser, dbpassword, dbport, interest):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
@@ -61,6 +62,7 @@ def update_interest(dbuser, dbpassword, dbport, interest):
     cursor.close()
     cxn.close()
 
+#fxn to retrun datafram consiting of the user_interests
 def getIntrestList(dbuser, dbpassword, dbport):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
@@ -69,6 +71,7 @@ def getIntrestList(dbuser, dbpassword, dbport):
     
     return interestDf
 
+#fxn to check if an interest exists before attempting to delete:
 def checkIfInterestExists(dbuser, dbpassword, dbport, interest):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
@@ -79,7 +82,7 @@ def checkIfInterestExists(dbuser, dbpassword, dbport, interest):
         cxn.close()
         return True
     
-
+#fxn to delete interest from user_interests
 def deleteInterest(dbuser, dbpassword, dbport, interest):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
@@ -89,6 +92,7 @@ def deleteInterest(dbuser, dbpassword, dbport, interest):
     cursor.close()
     cxn.close()
 
+#returns as datafram of faculty with associated user interst, ranked by score, as well as count of publications:
 def getTopFacultyByInterest(dbuser, dbpassword, dbport, interest):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     
@@ -102,13 +106,16 @@ def getTopFacultyByInterest(dbuser, dbpassword, dbport, interest):
     cxn.close()
     return facultyByInterst
 
+#fxn to add a faculty to the favoreite_faculty table:
 def addFavoriteFaculty(dbuser, dbpassword, dbport, facultyName):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
+    #fisr find faculty id from name:
     query = 'SELECT id FROM faculty WHERE name = "' + facultyName + '";'
     cursor.execute(query)
     newfacultyID = cursor.fetchall()[0][0]
-    print(newfacultyID)
+    
+    #get next id number:
     query = 'SELECT MAX(id) FROM favorite_faculty'
     cursor.execute(query)
     nextID = cursor.fetchall()[0][0]
@@ -116,6 +123,8 @@ def addFavoriteFaculty(dbuser, dbpassword, dbport, facultyName):
         nextID = 0
     else:
         nextID += 1
+    
+    #insert id and facutly_id into table:
     query = "INSERT INTO favorite_faculty VALUES (%s, %s)"
     cursor.execute(query, (nextID, newfacultyID))
 
@@ -123,6 +132,7 @@ def addFavoriteFaculty(dbuser, dbpassword, dbport, facultyName):
     cursor.close()
     cxn.close()
 
+#get df of favorite facultyL
 def getFavoriteFacultyDf(dbuser, dbpassword, dbport):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
@@ -131,6 +141,7 @@ def getFavoriteFacultyDf(dbuser, dbpassword, dbport):
     
     return df
 
+#get df of universities and respective count fo faculty sharing an interest with the user:
 def getUniversityDf(dbuser, dbpassword, dbport):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
@@ -145,6 +156,7 @@ def getUniversityDf(dbuser, dbpassword, dbport):
     cxn.close()
     return df
 
+#function to delete favorite faculty:
 def removeFavoriteFacaulty(dbuser, dbpassword, dbport, facultyToDelete):
     cxn = mysql.connector.connect(user=dbuser, password=dbpassword, host = dbport, database = 'academicworld')
     cursor = cxn.cursor()
@@ -160,7 +172,3 @@ def removeFavoriteFacaulty(dbuser, dbpassword, dbport, facultyToDelete):
     cursor.close()
     cxn.close()
 
-
-if __name__ == "__main__":
-
-    removeFavoriteFacaulty("root", "root_user", "127.0.0.1", 'Thomas R. Ioerger')
